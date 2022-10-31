@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import ru.netology.web.data.DataHelper;
 import ru.netology.web.page.LoginPage;
 import static com.codeborne.selenide.Selenide.open;
+import org.junit.jupiter.api.Assertions;
 
 public class TransferBetweenOwnCardsTest {
     LoginPage loginPage;
@@ -15,7 +16,7 @@ public class TransferBetweenOwnCardsTest {
     }
 
     @Test
-    void shouldTransferMoneyBetweenOwnCard() {
+    void shouldSuccessFulLogin() {
         var authInfo = DataHelper.getAuthInfo();
         var verificationPage = loginPage.validLogin(authInfo);
         var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
@@ -24,17 +25,42 @@ public class TransferBetweenOwnCardsTest {
     }
 
     @Test
-    void shouldTransferMoneyBetweenOwnCard1() {
+    void shouldTransferMoneyBetweenOwnCard() {
         var authInfo = DataHelper.getAuthInfo();
         var verificationPage = loginPage.validLogin(authInfo);
         var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        var transferAmount = DataHelper.getTransferAmount();
         var dashboardPage = verificationPage.validVerify(verificationCode);
-
-        int minIndex = dashboardPage.minBalanceIndex();
-        int balance = dashboardPage.getCardBalance(minIndex);
-        var replenishmentPage = dashboardPage.transferTo(minIndex);
-        dashboardPage = replenishmentPage.transferAmount(transferAmount);
-        dashboardPage.validBalance(minIndex, balance + Integer.parseInt(transferAmount.getAmount()));
+        var cardNumber1 = DataHelper.getCardNumber1();
+        var cardNumber2 = DataHelper.getCardNumber2();
+        var balanceCardNumber1 = dashboardPage.getCardBalance(cardNumber1.getIndex());
+        var balanceCardNumber2 = dashboardPage.getCardBalance(cardNumber2.getIndex());
+        var transferAmount = DataHelper.generateValidAmount(balanceCardNumber2);
+        var expectedBalanceCardNumber1 = balanceCardNumber1 + transferAmount;
+        var expectedBalanceCardNumber2 = balanceCardNumber2 - transferAmount;
+        var replenishmentPage = dashboardPage.transferTo(cardNumber1.getIndex());
+        dashboardPage = replenishmentPage.ValidTransfer(String.valueOf(transferAmount), cardNumber2);
+        var actualBalanceCardNumber1 = dashboardPage.getCardBalance(cardNumber1.getIndex());
+        var actualBalanceCardNumber2 = dashboardPage.getCardBalance(cardNumber2.getIndex());
+        Assertions.assertEquals(expectedBalanceCardNumber1, actualBalanceCardNumber1);
+        Assertions.assertEquals(expectedBalanceCardNumber2, actualBalanceCardNumber2);
     }
+
+    @Test
+    void shouldFindErrorMessageIfTransferInvalidAmount(){
+        var authInfo = DataHelper.getAuthInfo();
+        var verificationPage = loginPage.validLogin(authInfo);
+        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
+        var dashboardPage = verificationPage.validVerify(verificationCode);
+        var cardNumber1 = DataHelper.getCardNumber1();
+        var cardNumber2 = DataHelper.getCardNumber2();
+        var balanceCardNumber1 = dashboardPage.getCardBalance(cardNumber1.getIndex());
+        var balanceCardNumber2 = dashboardPage.getCardBalance(cardNumber2.getIndex());
+        var transferAmount = DataHelper.generateInvalidAmount(balanceCardNumber1);
+        var replenishmentPage = dashboardPage.transferTo(cardNumber2.getIndex());
+        replenishmentPage.transferAmount(String.valueOf(transferAmount), cardNumber1);
+        replenishmentPage.findErrorMessage("*Здесь должен быть текст ошибки, но он нам неизвестен, так что пишу от балды, всё равно тест упадет*");
+        Assertions.assertEquals(dashboardPage.getCardBalance(cardNumber1.getIndex()), balanceCardNumber1);
+        Assertions.assertEquals(dashboardPage.getCardBalance(cardNumber2.getIndex()), balanceCardNumber2);
+    }
+
 }

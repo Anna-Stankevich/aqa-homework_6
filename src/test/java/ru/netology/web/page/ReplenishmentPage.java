@@ -3,9 +3,9 @@ package ru.netology.web.page;
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
-import lombok.val;
-import org.openqa.selenium.Keys;
 import ru.netology.web.data.DataHelper;
+
+import java.time.Duration;
 
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
@@ -18,27 +18,25 @@ public class ReplenishmentPage {
     private SelenideElement amountField = $("[data-test-id=amount] input");
     private SelenideElement fromField = $("[data-test-id=from] input");
     private SelenideElement transferButton = $("[data-test-id=action-transfer]");
+    private SelenideElement errorMessage = $("[data-test-id='error-notification'] .notification__content");
 
     public ReplenishmentPage(){
         headings.find(Condition.exactText("Пополнение карты")).shouldBe(visible);
     }
 
-    private SelenideElement card = $("[data-test-id=to] input");
 
-    public String validCardNumber(){
-        if (card.val().equals(DataHelper.getCardNumberStar().getNumberCard())) {
-            return DataHelper.getCardNumber2().getNumberCard();
-        } else {
-            return DataHelper.getCardNumber1().getNumberCard();
-        }
+    public void transferAmount(String transferAmount, DataHelper.CardNumber cardNumber){
+        amountField.setValue(transferAmount);
+        fromField.setValue(cardNumber.getNumberCard());
+        transferButton.click();
+    }
+    public DashboardPage ValidTransfer(String transferAmount, DataHelper.CardNumber cardNumber){
+        transferAmount(transferAmount, cardNumber);
+        return new DashboardPage();
     }
 
-    public DashboardPage transferAmount(DataHelper.TransferAmount transferAmount){
-        amountField.setValue(transferAmount.getAmount());
-        fromField.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
-        fromField.click();
-        fromField.setValue(validCardNumber());
-        transferButton.click();
-        return new DashboardPage();
+    public void findErrorMessage(String expectedText) {
+        errorMessage.shouldHave(Condition.text(expectedText), Duration.ofSeconds(15)).shouldBe(Condition.visible);
+
     }
 }

@@ -3,7 +3,6 @@ package ru.netology.web.page;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 import lombok.val;
-import org.junit.jupiter.api.Assertions;
 
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
@@ -33,34 +32,9 @@ public class DashboardPage {
         return Integer.parseInt(value);
     }
 
-    //---------------------------------------------
-    public int minBalance() { // возвращает индекс карточки с минимальным балансом
-        int index = 0;
-        int min = getCardBalance(index);
-        int size = cards.size();
-        for (int i = 0; i < size; i++) {
-            int balance = getCardBalance(i);
-            if (balance < min) {
-                min = balance;
-                index = i;
-            }
-        }
-        return index;
-    }
-
-    public int minBalanceIndex() {
-        return minBalance();
-    }
-
     public ReplenishmentPage transferTo(int index) {
         SelenideElement button = $("[data-test-id=action-deposit]", index);
         button.click();
         return new ReplenishmentPage();
-    }
-
-    public void validBalance(int index, int expectedBalance){
-        var card = cards.get(index);
-        card.shouldBe(visible);
-        Assertions.assertEquals(getCardBalance(index), expectedBalance);
     }
 }
