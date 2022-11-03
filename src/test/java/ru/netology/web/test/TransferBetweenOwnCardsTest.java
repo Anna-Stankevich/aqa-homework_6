@@ -58,7 +58,7 @@ public class TransferBetweenOwnCardsTest {
         var transferAmount = DataHelper.generateInvalidAmount(balanceCardNumber1);
         var replenishmentPage = dashboardPage.transferTo(cardNumber2.getIndex());
         replenishmentPage.transferAmount(String.valueOf(transferAmount), cardNumber1);
-        replenishmentPage.findErrorMessage("Ошибка! Недостаточно средств для перевода!");
+        replenishmentPage.findErrorMessage("Ошибка! На Вашем счёте недостаточно средств для перевода!");
         Assertions.assertEquals(dashboardPage.getCardBalance(cardNumber1.getIndex()), balanceCardNumber1);
         Assertions.assertEquals(dashboardPage.getCardBalance(cardNumber2.getIndex()), balanceCardNumber2);
     }
