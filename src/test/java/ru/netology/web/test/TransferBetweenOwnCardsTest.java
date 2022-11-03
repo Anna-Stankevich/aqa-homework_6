@@ -38,7 +38,7 @@ public class TransferBetweenOwnCardsTest {
         var expectedBalanceCardNumber1 = balanceCardNumber1 + transferAmount;
         var expectedBalanceCardNumber2 = balanceCardNumber2 - transferAmount;
         var replenishmentPage = dashboardPage.transferTo(cardNumber1.getIndex());
-        dashboardPage = replenishmentPage.ValidTransfer(String.valueOf(transferAmount), cardNumber2);
+        dashboardPage = replenishmentPage.validTransfer(String.valueOf(transferAmount), cardNumber2);
         var actualBalanceCardNumber1 = dashboardPage.getCardBalance(cardNumber1.getIndex());
         var actualBalanceCardNumber2 = dashboardPage.getCardBalance(cardNumber2.getIndex());
         Assertions.assertEquals(expectedBalanceCardNumber1, actualBalanceCardNumber1);
@@ -58,7 +58,7 @@ public class TransferBetweenOwnCardsTest {
         var transferAmount = DataHelper.generateInvalidAmount(balanceCardNumber1);
         var replenishmentPage = dashboardPage.transferTo(cardNumber2.getIndex());
         replenishmentPage.transferAmount(String.valueOf(transferAmount), cardNumber1);
-        replenishmentPage.findErrorMessage("*Здесь должен быть текст ошибки, но он нам неизвестен, так что пишу от балды, всё равно тест упадет*");
+        replenishmentPage.findErrorMessage("Ошибка! Недостаточно средств для перевода!");
         Assertions.assertEquals(dashboardPage.getCardBalance(cardNumber1.getIndex()), balanceCardNumber1);
         Assertions.assertEquals(dashboardPage.getCardBalance(cardNumber2.getIndex()), balanceCardNumber2);
     }
